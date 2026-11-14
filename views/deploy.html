@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en" {{HTML_ATTRS}}>
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>֎ Auto-Deployer | {{BOTNAME}}</title>
+{{THEME_HEAD}}
+<style>
+  *{box-sizing:border-box} html,body{margin:0;padding:0}
+  body{min-height:100vh; color:var(--text); font-family:var(--font, Inter, system-ui, sans-serif)}
+  a{color:inherit;text-decoration:none}
+  header{border-bottom:1px solid var(--border); background:var(--header-bg); backdrop-filter:blur(16px); position:sticky; top:0; z-index:30}
+  nav{max-width:960px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; padding:14px 20px}
+  .brand{display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:.06em}
+  .brand img{width:34px;height:34px;border-radius:12px}
+  .back{color:var(--muted); font-size:.9rem}
+  .back:hover{color:var(--accent-bright)}
+  main{max-width:860px; margin:0 auto; padding:36px 20px 90px}
+  .hero-d{text-align:center; margin-bottom:36px}
+  .hero-d .mark{font-size:2.4rem; color:var(--accent-bright); text-shadow:var(--text-glow); margin-bottom:8px}
+  .hero-d h1{font-size:clamp(1.6rem,4vw,2.2rem); margin:0 0 10px; letter-spacing:-.03em}
+  .hero-d p{color:var(--muted); max-width:560px; margin:0 auto; line-height:1.55}
+  .form-card{
+    background:linear-gradient(160deg, rgba(16,25,54,.88), rgba(8,12,30,.94));
+    border:1px solid rgba(105,246,208,.16);
+    border-radius:28px; padding:28px 26px 32px;
+    box-shadow:0 24px 60px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.05);
+    position:relative; overflow:hidden;
+  }
+  .form-card::before{
+    content:''; position:absolute; inset:-50%;
+    background:conic-gradient(from 120deg, transparent, rgba(105,246,208,.06), transparent 35%);
+    animation:spin 22s linear infinite; pointer-events:none;
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .form-inner{position:relative; z-index:1}
+  .grid{display:grid; grid-template-columns:1fr 1fr; gap:16px}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}}
+  .field{display:flex; flex-direction:column; gap:6px; margin-bottom:14px}
+  .field.full{grid-column:1 / -1}
+  label{font-size:.72rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--muted)}
+  input, select, textarea{
+    background:rgba(4,9,25,.65); border:1px solid var(--border);
+    border-radius:14px; padding:13px 15px; color:var(--text);
+    font:inherit; outline:none; transition:border .2s, box-shadow .2s;
+  }
+  input:focus, select:focus, textarea:focus{
+    border-color:rgba(105,246,208,.55);
+    box-shadow:0 0 0 3px rgba(105,246,208,.12);
+  }
+  textarea{min-height:90px; resize:vertical; font-family:ui-monospace, Menlo, Consolas, monospace; font-size:.82rem}
+  .hint{font-size:.68rem; color:#7383a7; margin-top:2px}
+  .actions{display:flex; flex-wrap:wrap; gap:12px; margin-top:22px}
+  .btn-gen{
+    flex:1; min-width:180px; padding:15px 22px; border:none; border-radius:999px;
+    font-weight:800; font-size:.95rem; cursor:pointer;
+    background:linear-gradient(135deg,#69f6d0,#6bb8ff 55%,#8f7cff);
+    color:#04151a; box-shadow:0 12px 32px rgba(105,246,208,.28);
+    transition:transform .2s, filter .2s;
+  }
+  .btn-gen:hover{transform:translateY(-2px); filter:saturate(1.12)}
+  .btn-ghost{
+    padding:14px 20px; border-radius:999px; background:transparent;
+    border:1px solid var(--border); color:var(--text); font-weight:600; cursor:pointer;
+  }
+  .btn-ghost:hover{border-color:rgba(105,246,208,.45); color:var(--accent-bright)}
+  .result{display:none; margin-top:28px}
+  .result.show{display:block; animation:fadeUp .45s ease}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+  .steps{list-style:none; padding:0; margin:0 0 20px}
+  .steps li{
+    display:flex; gap:14px; align-items:flex-start; padding:14px 0;
+    border-bottom:1px solid rgba(196,212,255,.08);
+  }
+  .steps li:last-child{border-bottom:0}
+  .steps .n{
+    width:28px; height:28px; border-radius:50%; flex-shrink:0;
+    display:grid; place-items:center; font-size:.75rem; font-weight:800;
+    background:rgba(105,246,208,.12); color:var(--accent-bright);
+    border:1px solid rgba(105,246,208,.3);
+  }
+  .code-wrap{
+    position:relative; background:rgba(0,0,0,.4);
+    border:1px solid rgba(105,246,208,.15); border-radius:18px;
+    padding:16px; max-height:320px; overflow:auto;
+  }
+  .code-wrap pre{
+    margin:0; font: .72rem/1.55 ui-monospace, Menlo, Consolas, monospace;
+    color:#c8ffe9; white-space:pre-wrap; word-break:break-all;
+  }
+  .copy-bar{display:flex; justify-content:flex-end; margin-bottom:10px}
+  .copy-btn{
+    padding:8px 16px; border-radius:999px; border:1px solid rgba(105,246,208,.3);
+    background:rgba(105,246,208,.1); color:var(--accent-bright);
+    font-size:.75rem; font-weight:700; cursor:pointer;
+  }
+  .copy-btn:hover{background:rgba(105,246,208,.2)}
+  .toast{
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px);
+    background:rgba(10,16,36,.95); border:1px solid rgba(105,246,208,.25);
+    color:#e8fff8; padding:12px 22px; border-radius:999px; font-size:.85rem;
+    opacity:0; pointer-events:none; transition:.3s; z-index:99; backdrop-filter:blur(12px);
+  }
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+  .pill{display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:999px;
+    font-size:.62rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase;
+    background:rgba(105,246,208,.1); color:var(--accent-bright)}
+</style>
+</head>
+<body>
+<header>
+  <nav>
+    <a class="brand" href="/">
+      {{PAIR_LOGO}}
+      <span>֎ XADON Deploy</span>
+    </a>
+    <a class="back" href="/pair">← Session Vault</a>
+  </nav>
+</header>
+
+<main>
+  <div class="hero-d">
+    <div class="mark">֎</div>
+    <h1>Auto-Deployer Script</h1>
+    <p>Fill in your XADON session and bot details. We’ll generate a ready <b>index.js</b> bootstrapper that clones <code>musteqeem/XADON</code>, injects your secrets, and starts the bot on your panel.</p>
+  </div>
+
+  <div class="form-card">
+    <div class="form-inner">
+      <div class="grid">
+        <div class="field full">
+          <label>Session ID (xadon~…)</label>
+          <textarea id="sessionId" placeholder="xadon~eyJ2ZXJzaW9uIjoyLCJ0eXBlIjoieGFkb24tYXV0aCIsImZpbGVzIjp7Li4ufX0..."></textarea>
+          <span class="hint">Paste the full token from the Session Vault. Must start with xadon~</span>
+        </div>
+        <div class="field">
+          <label>Owner Number</label>
+          <input id="ownerNumber" type="text" placeholder="2348012345678" />
+          <span class="hint">International digits only, no +</span>
+        </div>
+        <div class="field">
+          <label>Bot Name</label>
+          <input id="botName" type="text" placeholder="XADON AI" value="XADON AI" />
+        </div>
+        <div class="field">
+          <label>Bot Font</label>
+          <select id="botFont">
+            <option value="bold" selected>Bold</option>
+            <option value="normal">Normal</option>
+            <option value="italic">Italic</option>
+            <option value="mono">Mono</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Owner Name</label>
+          <input id="ownerName" type="text" placeholder="XADON Operations" value="XADON Operations" />
+        </div>
+        <div class="field">
+          <label>Prefix</label>
+          <input id="prefix" type="text" placeholder="." value="." maxlength="3" />
+        </div>
+        <div class="field">
+          <label>Mode</label>
+          <select id="mode">
+            <option value="public" selected>Public</option>
+            <option value="private">Private</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Pairing Code (optional)</label>
+          <input id="pairingCode" type="text" placeholder="XADONITE" value="XADONITE" maxlength="8" />
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn-gen" id="generateBtn">Generate Deploy Script</button>
+        <button class="btn-ghost" id="resetBtn" type="button">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="result" id="result">
+    <p class="pill" style="margin-bottom:16px">֎ Ready · Paste as index.js</p>
+    <ol class="steps">
+      <li><span class="n">1</span><div><b>Open your hosting panel</b> (Pterodactyl, Bot-Hosting, Railway shell, etc.)</div></li>
+      <li><span class="n">2</span><div><b>Files → New File</b> → name it <code>index.js</code> and paste the script below</div></li>
+      <li><span class="n">3</span><div>Set <b>Startup Command</b> to <code>node index.js</code></div></li>
+      <li><span class="n">4</span><div>Click <b>Start</b> in the console. The script will clone <code>musteqeem/XADON</code>, write your session + .env, and launch the bot.</div></li>
+    </ol>
+    <div class="copy-bar"><button class="copy-btn" id="copyBtn">Copy Script</button></div>
+    <div class="code-wrap"><pre id="scriptOut"></pre></div>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  const $ = (id) => document.getElementById(id);
+  const toast = (msg) => {
+    const t = $('toast'); t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  };
+
+  function buildScript(cfg) {
+    // Escape for embedding inside a template literal in the generated file
+    const esc = (s) => String(s || '').replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$/g, '\\$');
+    const session = esc(cfg.sessionId.trim());
+    const owner = esc(cfg.ownerNumber.replace(/\D/g, ''));
+    const botName = esc(cfg.botName || 'XADON AI');
+    const ownerName = esc(cfg.ownerName || 'XADON Operations');
+    const botFont = esc(cfg.botFont || 'bold');
+    const prefix = esc(cfg.prefix || '.');
+    const mode = esc(cfg.mode || 'public');
+    const pairing = esc((cfg.pairingCode || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8));
+
+    return `/**
+ * XADON AI · Auto-Deployer Bootstrap
+ * Generated by the official XADON Secure Link site
+ * Repo: https://github.com/musteqeem/XADON
+ *
+ * 1. Save this file as index.js in your panel root
+ * 2. Startup command: node index.js
+ * 3. Start the console
+ */
+const { execSync, spawn } = require('child_process');
+const fs = require('fs');
+const path = require('path');
+
+const REPO = 'https://github.com/musteqeem/XADON.git';
+const BRANCH = 'main';
+const ROOT = process.cwd();
+const BOT_DIR = path.join(ROOT, 'xadon-bot');
+
+const SESSION_ID = \`${session}\`;
+const ENV = {
+  BOT_NAME: \`${botName}\`,
+  OWNER_NAME: \`${ownerName}\`,
+  OWNER_NUMBER: \`${owner}\`,
+  PREFIX: \`${prefix}\`,
+  MODE: \`${mode}\`,
+  PAIRING_CODE: \`${pairing}\`,
+  BOT_FONT: \`${botFont}\`,
+  SESSION_ID: SESSION_ID,
+  XADON_SESSION_ID: SESSION_ID,
+  CHANNEL_JID: '120363423325164241@newsletter',
+  CHANNEL_NAME: 'XADON AI Updates',
+};
+
+function log(msg) { console.log('[XADON Deploy]', msg); }
+
+function run(cmd, opts = {}) {
+  log(cmd);
+  execSync(cmd, { stdio: 'inherit', cwd: opts.cwd || ROOT, env: { ...process.env, ...opts.env } });
+}
+
+function writeEnv(dir) {
+  const lines = Object.entries(ENV)
+    .filter(([, v]) => v !== undefined && v !== '')
+    .map(([k, v]) => k + '=' + String(v).replace(/\\n/g, ''));
+  fs.writeFileSync(path.join(dir, '.env'), lines.join('\\n') + '\\n');
+  log('Wrote .env');
+}
+
+function ensureRepo() {
+  if (!fs.existsSync(path.join(BOT_DIR, 'package.json'))) {
+    log('Cloning musteqeem/XADON …');
+    if (fs.existsSync(BOT_DIR)) fs.rmSync(BOT_DIR, { recursive: true, force: true });
+    run('git clone --depth 1 --branch ' + BRANCH + ' ' + REPO + ' "' + BOT_DIR + '"');
+  } else {
+    log('Repo already present — pulling latest');
+    try { run('git pull --ff-only', { cwd: BOT_DIR }); } catch (_) { log('Pull skipped'); }
+  }
+}
+
+function main() {
+  if (!SESSION_ID || !SESSION_ID.startsWith('xadon')) {
+    console.error('Invalid SESSION_ID — must start with xadon~');
+    process.exit(1);
+  }
+  if (!ENV.OWNER_NUMBER || ENV.OWNER_NUMBER.length < 7) {
+    console.error('OWNER_NUMBER is required (international digits)');
+    process.exit(1);
+  }
+
+  log('Starting XADON auto-deploy…');
+  ensureRepo();
+  writeEnv(BOT_DIR);
+
+  // Install deps if needed
+  if (!fs.existsSync(path.join(BOT_DIR, 'node_modules'))) {
+    log('npm install…');
+    run('npm install --omit=dev', { cwd: BOT_DIR });
+  }
+
+  log('Launching XADON AI…');
+  const child = spawn('node', ['index.js'], {
+    cwd: BOT_DIR,
+    stdio: 'inherit',
+    env: { ...process.env, ...ENV },
+  });
+  child.on('exit', (code) => process.exit(code || 0));
+}
+
+main();
+`;
+  }
+
+  $('generateBtn').addEventListener('click', () => {
+    const sessionId = $('sessionId').value.trim();
+    const ownerNumber = $('ownerNumber').value.trim();
+    if (!sessionId) { toast('Paste your Session ID first'); return; }
+    if (!sessionId.toLowerCase().startsWith('xadon')) { toast('Session ID must start with xadon~'); return; }
+    if (!ownerNumber || ownerNumber.replace(/\D/g, '').length < 7) { toast('Enter a valid owner number'); return; }
+
+    const cfg = {
+      sessionId,
+      ownerNumber,
+      botName: $('botName').value.trim() || 'XADON AI',
+      ownerName: $('ownerName').value.trim() || 'XADON Operations',
+      botFont: $('botFont').value,
+      prefix: $('prefix').value.trim() || '.',
+      mode: $('mode').value,
+      pairingCode: $('pairingCode').value.trim(),
+    };
+    $('scriptOut').textContent = buildScript(cfg);
+    $('result').classList.add('show');
+    $('result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    toast('Script generated');
+  });
+
+  $('copyBtn').addEventListener('click', async () => {
+    const text = $('scriptOut').textContent;
+    try {
+      await navigator.clipboard.writeText(text);
+      toast('Copied to clipboard');
+    } catch {
+      const ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); ta.remove();
+      toast('Copied');
+    }
+  });
+
+  $('resetBtn').addEventListener('click', () => {
+    $('sessionId').value = '';
+    $('ownerNumber').value = '';
+    $('botName').value = 'XADON AI';
+    $('ownerName').value = 'XADON Operations';
+    $('botFont').value = 'bold';
+    $('prefix').value = '.';
+    $('mode').value = 'public';
+    $('pairingCode').value = 'XADONITE';
+    $('result').classList.remove('show');
+  });
+})();
+</script>
+</body>
+</html>
