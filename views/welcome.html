@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en" data-layout="glass" data-mode="dark" data-color="#69f6d0">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>֎ XADON AI</title>
+<style>
+  :root{
+    --accent:#69f6d0; --accent-2:#8f7cff; --bg:#050816; --text:#f4f7ff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;overflow:hidden}
+  body{
+    display:grid; place-items:center;
+    background:
+      radial-gradient(900px 600px at 15% -10%, rgba(105,246,208,.18), transparent 60%),
+      radial-gradient(800px 500px at 95% 10%, rgba(143,124,255,.16), transparent 55%),
+      var(--bg);
+  }
+  .stage{text-align:center; position:relative; z-index:2}
+  .logo-wrap{
+    width:120px; height:120px; margin:0 auto 28px;
+    border-radius:28px; overflow:hidden;
+    box-shadow:0 0 0 4px rgba(105,246,208,.15), 0 20px 50px rgba(0,0,0,.4);
+    animation:logoIn .9s cubic-bezier(.16,1,.3,1) both;
+  }
+  .logo-wrap img{width:100%;height:100%;object-fit:cover}
+  @keyframes logoIn{
+    from{opacity:0; transform:scale(.6) rotate(-12deg)}
+    to{opacity:1; transform:none}
+  }
+  .mark{
+    font-size:3.2rem; font-weight:700; color:var(--accent);
+    text-shadow:0 0 40px rgba(105,246,208,.45);
+    animation:fadeUp .7s .2s both;
+  }
+  h1{
+    font-size:clamp(1.8rem,5vw,2.6rem); letter-spacing:-.04em; margin:8px 0 10px;
+    animation:fadeUp .7s .35s both;
+  }
+  p{
+    color:#9aa8c7; max-width:380px; margin:0 auto 28px; line-height:1.5;
+    animation:fadeUp .7s .5s both;
+  }
+  @keyframes fadeUp{
+    from{opacity:0; transform:translateY(18px)}
+    to{opacity:1; transform:none}
+  }
+  .bar{
+    width:180px; height:3px; margin:0 auto; border-radius:99px;
+    background:rgba(255,255,255,.08); overflow:hidden;
+    animation:fadeUp .5s .65s both;
+  }
+  .bar i{
+    display:block; height:100%; width:0;
+    background:linear-gradient(90deg,var(--accent),var(--accent-2));
+    border-radius:99px;
+    animation:load 1.8s .8s cubic-bezier(.4,0,.2,1) forwards;
+  }
+  @keyframes load{to{width:100%}}
+  .orb{
+    position:fixed; border-radius:50%; filter:blur(60px); opacity:.5; pointer-events:none;
+    animation:float 12s ease-in-out infinite;
+  }
+  .orb1{width:280px;height:280px; background:rgba(105,246,208,.2); top:10%; left:-5%}
+  .orb2{width:220px;height:220px; background:rgba(143,124,255,.22); bottom:8%; right:-4%; animation-delay:-4s}
+  @keyframes float{
+    0%,100%{transform:translate(0,0)}
+    50%{transform:translate(20px,-24px)}
+  }
+  .skip{
+    position:fixed; bottom:28px; right:28px; z-index:5;
+    color:#7e8fb5; font-size:.8rem; text-decoration:none;
+    opacity:0; animation:fadeUp .5s 1.2s both;
+  }
+  .skip:hover{color:var(--accent)}
+</style>
+</head>
+<body>
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="stage">
+    <div class="logo-wrap">
+      <img src="/brand-logo" alt="XADON" onerror="this.style.display='none'" />
+    </div>
+    <div class="mark">֎</div>
+    <h1>XADON AI</h1>
+    <p>Secure session vault · Production linking · Operator-grade tools</p>
+    <div class="bar"><i></i></div>
+  </div>
+  <a class="skip" href="/home">Skip intro →</a>
+<script>
+  // After animation, go to home (or respect ?next=)
+  const next = new URLSearchParams(location.search).get('next') || '/home';
+  setTimeout(() => { location.replace(next); }, 2800);
+</script>
+</body>
+</html>
