@@ -1,0 +1,29 @@
+{
+  "name": "xadon-pair-site",
+  "description": "XADON AI Secure Session Generator + Auto-Deployer \u2014 premium pairing, QR, vault & panel bootstrap",
+  "version": "2.1.0",
+  "main": "./index.js",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js"
+  },
+  "author": "XADON Labs",
+  "license": "GPL-3.0",
+  "dependencies": {
+    "@musteqeem/baileys": "^1.0.7",
+    "awesome-phonenumber": "^2.64.0",
+    "body-parser": "^1.20.1",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^17.4.2",
+    "express": "^4.18.1",
+    "jimp": "^1.6.1",
+    "pastebin-js": "^1.0.6",
+    "phone": "3.1.30",
+    "pino": "^8.1.0",
+    "qrcode": "^1.5.3",
+    "wolfbtns": "1.3.2"
+  }
+}
